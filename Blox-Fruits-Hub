@@ -1,1 +1,773 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+local Window = Rayfield:CreateWindow({
+   Name = "Blox-Fruits-Hub",
+   LoadingTitle = "PNXFusion2000",
+   LoadingSubtitle = "by PhantomNovaX",
+   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+    ConfigurationSaving = {
+      Enabled = false,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "PNXFusion2000-F1"
+   },
+
+   Discord = {
+      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+
+   KeySystem = false, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Blox-Fruits-Hub-Key",
+      Subtitle = "Sub to PhantomNovaX On YT",
+      Note = "Key here: https://pastebin.com/3te7CDnJ", -- Use this to tell the user how to get a key
+      FileName = "PNXFusion2000-Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = true, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"https://pastebin.com/3te7CDnJ"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
+})
+
+local MainTab = Window:CreateTab("🏠Home", nil) -- Title, Image
+local MainSection = MainTab:CreateSection("Section Example")
+
+Rayfield:Notify({
+   Title = "PNXFusion2000 ACTIVATED!",
+   Content = "You May Now Use Blox-Fruits-Hub",
+   Duration = 5,
+   Image = 4483362458,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "AutoFarm Level",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+   -- The function that takes place when the toggle is pressed
+   -- The variable (Value) is a boolean on whether the toggle is true or false
+-- Blox Fruits Complete AutoFarm Script
+-- All NPCs and Quests for Sea 1, 2, and 3
+-- Auto weapon selection and combat
+
+local player = game:GetService("Players").LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Configuration
+local autoFarmEnabled = true
+local currentQuest = nil
+local questNPC = nil
+local farmCooldown = 1
+local questRefreshInterval = 30
+local currentSea = 1
+local currentWeapon = "Melee"
+local gunEquipped = false
+
+-- Services
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local PathfindingService = game:GetService("PathfindingService")
+
+-- Pathfinding
+local path = PathfindingService:CreatePath({
+    AgentRadius = 2,
+    AgentHeight = 5,
+    AgentCanJump = true
+})
+
+-- Complete NPC Database with all your listed NPCs
+local questNPCs = {
+    -- Sea 1
+    [1] = {
+        {name = "Trainee", levelRange = {0, 10}, npcName = "Marine Leader", location = "Starter Island: Marine", exp = 300, money = 350},
+        {name = "Bandit", levelRange = {0, 10}, npcName = "Bandit Quest Giver", location = "Starter Island: Pirate", exp = 300, money = 350},
+        {name = "Monkey", levelRange = {10, 20}, npcName = "Adventurer", location = "Jungle", exp = 2300, money = 800},
+        {name = "Gorilla", levelRange = {15, 30}, npcName = "Adventurer", location = "Jungle", exp = 4500, money = 1200},
+        {name = "Pirate", levelRange = {30, 45}, npcName = "Pirate Adventurer", location = "Pirate Village", exp = 13000, money = 3000},
+        {name = "Brute", levelRange = {40, 60}, npcName = "Pirate Adventurer", location = "Pirate Village", exp = 22000, money = 3500},
+        {name = "Desert Bandits", levelRange = {60, 80}, npcName = "Desert Adventurer", location = "Desert", exp = 45000, money = 4000},
+        {name = "Desert Officers", levelRange = {75, 90}, npcName = "Desert Adventurer", location = "Desert", exp = 65000, money = 4500},
+        {name = "Snow Bandit", levelRange = {90, 110}, npcName = "Villager", location = "Frozen Village", exp = 90000, money = 5000},
+        {name = "Snowman", levelRange = {100, 120}, npcName = "Villager", location = "Frozen Village", exp = 150000, money = 5500},
+        {name = "Chief Petty Officer", levelRange = {120, 140}, npcName = "Marine", location = "Marine Fortress", exp = 225000, money = 6000},
+        {name = "Sky Bandit", levelRange = {150, 170}, npcName = "Sky Adventurer", location = "Skylands", exp = 315000, money = 7000},
+        {name = "Prisoners", levelRange = {190, 210}, npcName = "Jail Keeper", location = "Prison", exp = 550000, money = 7000},
+        {name = "Dangerous Prisoners", levelRange = {210, 230}, npcName = "Jail Keeper", location = "Prison", exp = 780000, money = 7500},
+        {name = "Toga Warriors", levelRange = {250, 270}, npcName = "Colosseum Quest Giver", location = "Colosseum", exp = 1100000, money = 7000},
+        {name = "Mil. Soldiers", levelRange = {300, 325}, npcName = "The Mayor", location = "Magma Village", exp = 1700000, money = 8250},
+        {name = "Fishman Warriors", levelRange = {375, 400}, npcName = "King Neptune", location = "Underwater City", exp = 3050000, money = 8750},
+        {name = "God's Guards", levelRange = {450, 475}, npcName = "Mole", location = "Upper Skylands", exp = 4250000, money = 8750},
+        {name = "Royal Squads", levelRange = {525, 550}, npcName = "Sky Quest Giver 2", location = "Upper Skylands", exp = 5800000, money = 9500},
+        {name = "Galley Pirates", levelRange = {625, 650}, npcName = "Freezeburg Quest Giver", location = "Fountain City", exp = 7500000, money = 10000},
+    },
+    
+    -- Sea 2
+    [2] = {
+        {name = "Raider", levelRange = {700, 725}, npcName = "Area 1 Quest Giver", location = "Kingdom of Rose: Area 1", exp = 8750000, money = 10250},
+        {name = "Mercenary", levelRange = {725, 750}, npcName = "Area 1 Quest Giver", location = "Kingdom of Rose: Area 1", exp = 9750000, money = 10500},
+        {name = "Swan Pirate", levelRange = {775, 800}, npcName = "Area 2 Quest Giver", location = "Kingdom of Rose: Area 2", exp = 11500000, money = 10750},
+        {name = "Factory Staff", levelRange = {800, 825}, npcName = "Area 2 Quest Giver", location = "Kingdom of Rose: Area 2", exp = 13000000, money = 11000},
+        {name = "Marine Lieutenant", levelRange = {875, 900}, npcName = "Marine Quest Giver", location = "Green Zone", exp = 15000000, money = 11250},
+        {name = "Zombie", levelRange = {950, 975}, npcName = "Graveyard Quest Giver", location = "Graveyard Island", exp = 19000000, money = 11750},
+        {name = "Snow Trooper", levelRange = {1000, 1025}, npcName = "Snow Quest Giver", location = "Snow Mountains", exp = 22500000, money = 12250},
+        {name = "Lab Subordinate", levelRange = {1100, 1125}, npcName = "Ice Quest Giver", location = "Hot And Cold", exp = 25500000, money = 12250},
+        {name = "Ship Deckhand", levelRange = {1250, 1275}, npcName = "Rear Crew Quest Giver", location = "Cursed Ship", exp = 33000000, money = 12250},
+        {name = "Arctic Warriors", levelRange = {1350, 1375}, npcName = "Frost Quest Giver", location = "Ice Castle", exp = 41000000, money = 12250},
+        {name = "Sea Soldier", levelRange = {1425, 1450}, npcName = "Forgotten Quest Giver", location = "Forgotten Island", exp = 47000000, money = 12250},
+    },
+    
+    -- Sea 3
+    [3] = {
+        {name = "Pirate Millionaire", levelRange = {1500, 1525}, npcName = "Pirate Port Quest Giver", location = "Port Town", exp = 53000000, money = 13000},
+        {name = "Dragon Crew Warrior", levelRange = {1575, 1600}, npcName = "Dragon Crew Quest Giver", location = "Hydra Island", exp = 58000000, money = 13000},
+        {name = "Marine Commodore", levelRange = {1700, 1725}, npcName = "Marine Tree Quest Giver", location = "Great Tree", exp = 68000000, money = 13000},
+        {name = "Fishman Raider", levelRange = {1775, 1800}, npcName = "Turtle Adventure Quest Giver", location = "Floating Turtle", exp = 73000000, money = 13000},
+        {name = "Forest Pirate", levelRange = {1825, 1850}, npcName = "Deep Forest Quest Giver", location = "Floating Turtle", exp = 78000000, money = 13000},
+        {name = "Reborn Skeleton", levelRange = {1975, 2000}, npcName = "Haunted Castle Quest Giver 1", location = "Haunted Castle", exp = 90000000, money = 13000},
+        {name = "Peanut Scout", levelRange = {2075, 2100}, npcName = "Peanut Quest Giver", location = "Sea of Treats", exp = 100000000, money = 14000},
+        {name = "Ice Cream Chef", levelRange = {2125, 2150}, npcName = "Ice Cream Quest Giver", location = "Sea of Treats", exp = 105000000, money = 14200},
+        {name = "Cookie Crafter", levelRange = {2200, 2225}, npcName = "Cake Quest Giver 1", location = "Sea of Treats", exp = 110000000, money = 14200},
+        {name = "Cocoa Warrior", levelRange = {2300, 2325}, npcName = "Chocolate Quest Giver 1", location = "Sea of Treats", exp = 120000000, money = 14600},
+        {name = "Isle Outlaw", levelRange = {2450, 2475}, npcName = "Tiki Quest Giver 1", location = "Tiki Outpost", exp = 133000000, money = 15100},
+        {name = "Serpent Hunter", levelRange = {2550, 2575}, npcName = "Tiki Quest Giver 3", location = "Tiki Outpost", exp = 141000000, money = 15750},
+    }
+}
+
+-- Detect current sea based on level
+function detectSea()
+    local level = getPlayerLevel()
+    if level >= 700 then return 3
+    elseif level >= 300 then return 2
+    else return 1 end
+end
+
+-- Get player level with error handling
+function getPlayerLevel()
+    local success, stats = pcall(function()
+        return player:WaitForChild("Data"):WaitForChild("Level").Value
+    end)
+    return success and stats or 1
+end
+
+-- Enhanced NPC finding with multiple checks
+function findNPC(npcName)
+    -- Check common locations first
+    local locations = {
+        workspace,
+        workspace:FindFirstChild("NPCs"),
+        workspace:FindFirstChild("QuestNPCs"),
+        workspace:FindFirstChild("Islands"),
+        workspace:FindFirstChild("Map"),
+        workspace:FindFirstChild("Live")
+    }
+    
+    for _, location in pairs(locations) do
+        if location then
+            local npc = location:FindFirstChild(npcName, true)
+            if npc then return npc end
+        end
+    end
+    
+    -- Fallback: Search entire workspace
+    return workspace:FindFirstChild(npcName, true)
+end
+
+-- Update equipped weapons and select best one
+function updateWeaponStats()
+    local bestDamage = 0
+    currentWeapon = "Melee" -- Default fallback
+    gunEquipped = false
+    
+    -- Check all weapon types
+    local weaponTypes = {
+        {type = "BloxFruit", stat = "Fruit"},
+        {type = "Sword", stat = "Sword"},
+        {type = "Gun", stat = "Gun"}
+    }
+    
+    for _, weapon in pairs(weaponTypes) do
+        local success, stat = pcall(function()
+            return player:WaitForChild("Data"):WaitForChild("Stats"):FindFirstChild(weapon.stat)
+        end)
+        
+        if success and stat then
+            local damage = stat:FindFirstChild("Damage") or 
+                          stat:FindFirstChild("MeleeDamage") or 
+                          stat:FindFirstChild("RangeDamage")
+            if damage and damage.Value > bestDamage then
+                bestDamage = damage.Value
+                currentWeapon = weapon.type
+                gunEquipped = (weapon.type == "Gun")
+            end
+        end
+    end
+end
+
+-- Get appropriate quest NPC
+function findAppropriateQuestNPC()
+    currentSea = detectSea()
+    local playerLevel = getPlayerLevel()
+    
+    if not questNPCs[currentSea] then return nil end
+    
+    -- Find best matching NPC
+    local bestNPC, bestDiff = nil, math.huge
+    for _, npcInfo in pairs(questNPCs[currentSea]) do
+        if playerLevel >= npcInfo.levelRange[1] and playerLevel <= npcInfo.levelRange[2] then
+            local npc = findNPC(npcInfo.npcName)
+            if npc then return npc, npcInfo.name end
+        end
+        
+        -- Calculate level difference for fallback
+        local diff = math.min(
+            math.abs(playerLevel - npcInfo.levelRange[1]),
+            math.abs(playerLevel - npcInfo.levelRange[2])
+        )
+        
+        if diff < bestDiff then
+            local npc = findNPC(npcInfo.npcName)
+            if npc then
+                bestNPC = npc
+                bestDiff = diff
+                currentQuest = npcInfo.name
+            end
+        end
+    end
+    
+    return bestNPC, currentQuest
+end
+
+-- Accept quest from NPC
+function getQuest(npc)
+    if not npc then return false end
+    
+    local npcRoot = npc:FindFirstChild("HumanoidRootPart") or npc:FindFirstChild("UpperTorso") or npc:FindFirstChild("Torso")
+    if not npcRoot then return false end
+    
+    -- Move to NPC
+    path:ComputeAsync(rootPart.Position, npcRoot.Position)
+    if path.Status == Enum.PathStatus.Success then
+        for _, waypoint in pairs(path:GetWaypoints()) do
+            humanoid:MoveTo(waypoint.Position)
+            if waypoint.Action == Enum.PathWaypointAction.Jump then
+                humanoid.Jump = true
+            end
+            humanoid.MoveToFinished:Wait()
+        end
+    else
+        humanoid:MoveTo(npcRoot.Position)
+        humanoid.MoveToFinished:Wait()
+    end
+    
+    -- Face NPC and interact
+    character:SetPrimaryPartCFrame(CFrame.new(rootPart.Position, npcRoot.Position))
+    
+    for i = 1, 3 do -- Try multiple times
+        VirtualInputManager:SendKeyEvent(true, "E", false, game)
+        task.wait(0.1)
+        VirtualInputManager:SendKeyEvent(false, "E", false, game)
+        task.wait(0.5)
+    end
+    
+    return true
+end
+
+-- Find enemies for current quest
+function findQuestEnemies()
+    if not currentQuest then return nil end
+    
+    local enemyName = currentQuest:gsub(" Quest Giver", ""):gsub("Adventurer", "")
+    local enemies = {}
+    
+    -- Check all potential enemy locations
+    local locations = {"Enemies", "NPCs", "Live", "SpawnedEnemies"}
+    for _, loc in pairs(locations) do
+        local folder = workspace:FindFirstChild(loc)
+        if folder then
+            for _, enemy in pairs(folder:GetChildren()) do
+                if enemy.Name:find(enemyName) and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+                    table.insert(enemies, enemy)
+                end
+            end
+        end
+    end
+    
+    return #enemies > 0 and enemies or nil
+end
+
+-- Combat with selected weapon
+function farmEnemy(enemy)
+    if not enemy or not enemy:FindFirstChild("Humanoid") or enemy.Humanoid.Health <= 0 then
+        return false
+    end
+    
+    local enemyRoot = enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("UpperTorso") or enemy:FindFirstChild("Torso")
+    if not enemyRoot then return false end
+    
+    -- Update weapon before attacking
+    updateWeaponStats()
+    
+    -- Calculate optimal distance
+    local combatDistance = gunEquipped and 20 or 5
+    local targetPos = enemyRoot.Position
+    
+    if gunEquipped then
+        local dir = (rootPart.Position - enemyRoot.Position).Unit
+        targetPos = enemyRoot.Position + (dir * combatDistance)
+    end
+    
+    -- Move to enemy
+    path:ComputeAsync(rootPart.Position, targetPos)
+    if path.Status == Enum.PathStatus.Success then
+        for _, waypoint in pairs(path:GetWaypoints()) do
+            humanoid:MoveTo(waypoint.Position)
+            if waypoint.Action == Enum.PathWaypointAction.Jump then
+                humanoid.Jump = true
+            end
+            humanoid.MoveToFinished:Wait()
+        end
+    else
+        humanoid:MoveTo(targetPos)
+        humanoid.MoveToFinished:Wait()
+    end
+    
+    -- Face enemy
+    character:SetPrimaryPartCFrame(CFrame.new(rootPart.Position, enemyRoot.Position))
+    
+    -- Weapon-specific attacks
+    if currentWeapon == "BloxFruit" then
+        -- Fruit skills
+        local skills = {"Z", "X", "C", "V", "F"}
+        for _, key in pairs(skills) do
+            VirtualInputManager:SendKeyEvent(true, key, false, game)
+            task.wait(0.1)
+            VirtualInputManager:SendKeyEvent(false, key, false, game)
+            task.wait(0.2)
+        end
+        
+    elseif currentWeapon == "Sword" then
+        -- Sword skills + melee
+        VirtualInputManager:SendKeyEvent(true, "Z", false, game)
+        task.wait(0.1)
+        VirtualInputManager:SendKeyEvent(false, "Z", false, game)
+        
+        for i = 1, 3 do
+            VirtualInputManager:SendMouseButtonEvent(true, Enum.UserInputType.MouseButton1)
+            task.wait(0.1)
+            VirtualInputManager:SendMouseButtonEvent(false, Enum.UserInputType.MouseButton1)
+            task.wait(0.2)
+        end
+        
+    elseif currentWeapon == "Gun" then
+        -- Automatic gunfire
+        for i = 1, 5 do
+            VirtualInputManager:SendMouseButtonEvent(true, Enum.UserInputType.MouseButton1)
+            task.wait(0.05)
+            VirtualInputManager:SendMouseButtonEvent(false, Enum.UserInputType.MouseButton1)
+            task.wait(0.1)
+        end
+        
+    else
+        -- Melee combat
+        for i = 1, 4 do
+            VirtualInputManager:SendMouseButtonEvent(true, Enum.UserInputType.MouseButton1)
+            task.wait(0.1)
+            VirtualInputManager:SendMouseButtonEvent(false, Enum.UserInputType.MouseButton1)
+            task.wait(0.15)
+        end
+    end
+    
+    return true
+end
+
+-- Main farming loop
+function autoFarm()
+    local lastQuestCheck = 0
+    
+    while autoFarmEnabled and task.wait(farmCooldown) do
+        -- Refresh quest periodically
+        if time() - lastQuestCheck > questRefreshInterval or not currentQuest then
+            questNPC, currentQuest = findAppropriateQuestNPC()
+            if questNPC then
+                getQuest(questNPC)
+            end
+            lastQuestCheck = time()
+        end
+        
+        -- Find and farm enemies
+        local enemies = findQuestEnemies()
+        if enemies and #enemies > 0 then
+            -- Find closest enemy
+            local closest, dist = nil, math.huge
+            for _, enemy in pairs(enemies) do
+                local enemyRoot = enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("UpperTorso") or enemy:FindFirstChild("Torso")
+                if enemyRoot then
+                    local newDist = (rootPart.Position - enemyRoot.Position).Magnitude
+                    if newDist < dist then
+                        closest = enemy
+                        dist = newDist
+                    end
+                end
+            end
+            
+            if closest then
+                farmEnemy(closest)
+            else
+                -- Wander if no enemies nearby
+                local randomPos = rootPart.Position + Vector3.new(math.random(-50, 50), 0, math.random(-50, 50))
+                humanoid:MoveTo(randomPos)
+                task.wait(3)
+            end
+        else
+            -- Try to get quest again
+            questNPC, currentQuest = findAppropriateQuestNPC()
+            if questNPC then
+                getQuest(questNPC)
+            else
+                -- Wander if no quest NPC found
+                local randomPos = rootPart.Position + Vector3.new(math.random(-50, 50), 0, math.random(-50, 50))
+                humanoid:MoveTo(randomPos)
+                task.wait(3)
+            end
+        end
+    end
+end
+
+-- Handle respawns
+player.CharacterAdded:Connect(function(newChar)
+    character = newChar
+    humanoid = character:WaitForChild("Humanoid")
+    rootPart = character:WaitForChild("HumanoidRootPart")
+    
+    task.wait(5) -- Respawn delay
+    updateWeaponStats()
+    if autoFarmEnabled then
+        coroutine.wrap(autoFarm)()
+    end
+end)
+
+-- Start farming
+updateWeaponStats()
+print(string.format("Blox Fruits AutoFarm Activated! | Sea: %d | Weapon: %s | Quest: %s", 
+    detectSea(), currentWeapon, currentQuest or "None"))
+    
+coroutine.wrap(autoFarm)()   
+   end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "AutoFarm All Bosses",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+   -- The function that takes place when the toggle is pressed
+   -- The variable (Value) is a boolean on whether the toggle is true or false
+  -- Blox Fruits Boss AutoFarm
+-- Automatically farms all bosses in your current sea
+-- Starts immediately when injected
+
+local player = game:GetService("Players").LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Configuration
+local autoFarmEnabled = true
+local currentBoss = nil
+local farmCooldown = 3 -- Longer cooldown for bosses
+local currentSea = 1
+
+-- Services
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local PathfindingService = game:GetService("PathfindingService")
+
+-- Pathfinding
+local path = PathfindingService:CreatePath({
+    AgentRadius = 2,
+    AgentHeight = 5,
+    AgentCanJump = true
+})
+
+-- Complete Boss Database for All Seas
+local seaBosses = {
+    -- Sea 1 Bosses
+    [1] = {
+        {name = "Gorilla King", npcName = "Gorilla King", location = "Jungle", level = 20, health = 5000},
+        {name = "Bobby", npcName = "Bobby", location = "Pirate Village", level = 55, health = 8000},
+        {name = "Yeti", npcName = "Yeti", location = "Frozen Village", level = 105, health = 12000},
+        {name = "Vice Admiral", npcName = "Vice Admiral", location = "Marine Fortress", level = 130, health = 15000},
+        {name = "Warden", npcName = "Warden", location = "Prison", level = 220, health = 20000},
+        {name = "Chief Warden", npcName = "Chief Warden", location = "Prison", level = 230, health = 25000},
+        {name = "Swan", npcName = "Swan", location = "Prison", level = 240, health = 30000},
+        {name = "Magma Admiral", npcName = "Magma Admiral", location = "Magma Village", level = 350, health = 40000},
+        {name = "Fishman Lord", npcName = "Fishman Lord", location = "Underwater City", level = 425, health = 45000},
+        {name = "Wysper", npcName = "Wysper", location = "Upper Skylands", level = 500, health = 50000},
+        {name = "Thunder God", npcName = "Thunder God", location = "Upper Skylands", level = 575, health = 60000},
+        {name = "Cyborg", npcName = "Cyborg", location = "Fountain City", level = 675, health = 70000},
+    },
+    
+    -- Sea 2 Bosses
+    [2] = {
+        {name = "Diamond", npcName = "Diamond", location = "Kingdom of Rose: Area 1", level = 750, health = 80000},
+        {name = "Jeremy", npcName = "Jeremy", location = "Kingdom of Rose: Area 2", level = 850, health = 90000},
+        {name = "Fajita", npcName = "Fajita", location = "Green Zone", level = 925, health = 100000},
+        {name = "Smoke Admiral", npcName = "Smoke Admiral", location = "Hot And Cold", level = 1150, health = 120000},
+        {name = "Awakened Ice Admiral", npcName = "Awakened Ice Admiral", location = "Ice Castle", level = 1400, health = 150000},
+        {name = "Tide Keeper", npcName = "Tide Keeper", location = "Forgotten Island", level = 1475, health = 160000},
+    },
+    
+    -- Sea 3 Bosses
+    [3] = {
+        {name = "Stone", npcName = "Stone", location = "Port Town", level = 1550, health = 180000},
+        {name = "Hydra Leader", npcName = "Hydra Leader", location = "Hydra Island", level = 1675, health = 200000},
+        {name = "Kilo Admiral", npcName = "Kilo Admiral", location = "Great Tree", level = 1750, health = 220000},
+        {name = "Captain Elephant", npcName = "Captain Elephant", location = "Floating Turtle", level = 1875, health = 240000},
+        {name = "Beautiful Pirate", npcName = "Beautiful Pirate", location = "Floating Turtle", level = 1950, health = 260000},
+        {name = "Cake Queen", npcName = "Cake Queen", location = "Sea of Treats", level = 2175, health = 280000},
+    }
+}
+
+-- Detect current sea based on level
+function detectSea()
+    local level = getPlayerLevel()
+    if level >= 700 then return 3
+    elseif level >= 300 then return 2
+    else return 1 end
+end
+
+-- Get player level
+function getPlayerLevel()
+    local success, stats = pcall(function()
+        return player:WaitForChild("Data"):WaitForChild("Level").Value
+    end)
+    return success and stats or 1
+end
+
+-- Find boss in workspace
+function findBoss(bossName)
+    -- Check common boss locations
+    local locations = {
+        workspace,
+        workspace:FindFirstChild("Bosses"),
+        workspace:FindFirstChild("NPCs"),
+        workspace:FindFirstChild("Islands"),
+        workspace:FindFirstChild("Map"),
+        workspace:FindFirstChild("Live")
+    }
+    
+    for _, location in pairs(locations) do
+        if location then
+            local boss = location:FindFirstChild(bossName, true)
+            if boss then return boss end
+        end
+    end
+    
+    return nil
+end
+
+-- Get next boss to farm
+function getNextBoss()
+    currentSea = detectSea()
+    if not seaBosses[currentSea] then return nil end
+    
+    -- Try to find any available boss in current sea
+    for _, bossInfo in pairs(seaBosses[currentSea]) do
+        local boss = findBoss(bossInfo.npcName)
+        if boss then
+            return boss, bossInfo.name
+        end
+    end
+    
+    return nil
+end
+
+-- Combat with boss
+function fightBoss(boss)
+    if not boss or not boss:FindFirstChild("Humanoid") or boss.Humanoid.Health <= 0 then
+        return false
+    end
+    
+    local bossRoot = boss:FindFirstChild("HumanoidRootPart") or boss:FindFirstChild("UpperTorso") or boss:FindFirstChild("Torso")
+    if not bossRoot then return false end
+    
+    -- Move to boss (maintain some distance)
+    local targetPos = bossRoot.Position + (bossRoot.CFrame.LookVector * -10) -- Stay 10 studs back
+    
+    path:ComputeAsync(rootPart.Position, targetPos)
+    if path.Status == Enum.PathStatus.Success then
+        for _, waypoint in pairs(path:GetWaypoints()) do
+            humanoid:MoveTo(waypoint.Position)
+            if waypoint.Action == Enum.PathWaypointAction.Jump then
+                humanoid.Jump = true
+            end
+            humanoid.MoveToFinished:Wait()
+        end
+    else
+        humanoid:MoveTo(targetPos)
+        humanoid.MoveToFinished:Wait()
+    end
+    
+    -- Face boss
+    character:SetPrimaryPartCFrame(CFrame.new(rootPart.Position, bossRoot.Position))
+    
+    -- Use all combat skills (Z,X,C,V,F + M1)
+    local attackSequence = {
+        {"Z", 0.2},
+        {"X", 0.2},
+        {"C", 0.2},
+        {"V", 0.2},
+        {"F", 0.2},
+        {Enum.UserInputType.MouseButton1, 0.1}
+    }
+    
+    for _, attack in pairs(attackSequence) do
+        if type(attack[1]) == "string" then
+            VirtualInputManager:SendKeyEvent(true, attack[1], false, game)
+            task.wait(attack[2])
+            VirtualInputManager:SendKeyEvent(false, attack[1], false, game)
+        else
+            VirtualInputManager:SendMouseButtonEvent(true, attack[1])
+            task.wait(attack[2])
+            VirtualInputManager:SendMouseButtonEvent(false, attack[1])
+        end
+        task.wait(0.1)
+    end
+    
+    return true
+end
+
+-- Main boss farming loop
+function bossFarm()
+    while autoFarmEnabled and task.wait(farmCooldown) do
+        -- Get next available boss
+        local boss, bossName = getNextBoss()
+        
+        if boss then
+            currentBoss = bossName
+            fightBoss(boss)
+        else
+            -- No bosses found, wait and check again
+            print("No bosses found in Sea "..currentSea..". Waiting...")
+            task.wait(5)
+        end
+    end
+end
+
+-- Auto-respawn handler
+player.CharacterAdded:Connect(function(newChar)
+    character = newChar
+    humanoid = character:WaitForChild("Humanoid")
+    rootPart = character:WaitForChild("HumanoidRootPart")
+    
+    task.wait(5) -- Wait after respawn
+    if autoFarmEnabled then
+        coroutine.wrap(bossFarm)()
+    end
+end)
+
+-- Start boss farming
+print("Boss AutoFarm activated! Farming Sea "..detectSea().." bosses...")
+coroutine.wrap(bossFarm)()
+   end,
+})
+
+local Slider = Tab:CreateSlider({
+   Name = "Toggle Walkspeed",
+   Range = {0, 100},
+   Increment = 1,
+   Suffix = "Speed",
+   CurrentValue = 16,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = (Value)
+    end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Fly",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+        -- Ultra-Fast Flight for Island Hopping
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
+local player = game:GetService("Players").LocalPlayer
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- Auto-start flight
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+humanoid.PlatformStand = true
+
+local bodyVelocity = Instance.new("BodyVelocity")
+bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+bodyVelocity.Parent = character:WaitForChild("HumanoidRootPart")
+
+-- Extreme speed (faster than dragon flight)
+local FLIGHT_SPEED = 300 
+local BOOST_MULTIPLIER = 3 -- Shift boost
+
+-- Continuous flight controls
+RunService.Heartbeat:Connect(function()
+    local root = character:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    
+    local direction = Vector3.new()
+    local speed = FLIGHT_SPEED
+    
+    -- Speed boost when holding Shift
+    if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
+        speed = FLIGHT_SPEED * BOOST_MULTIPLIER
+    end
+    
+    -- Movement controls
+    if UIS:IsKeyDown(Enum.KeyCode.W) then
+        direction = direction + root.CFrame.LookVector
+    end
+    if UIS:IsKeyDown(Enum.KeyCode.S) then
+        direction = direction - root.CFrame.LookVector
+    end
+    if UIS:IsKeyDown(Enum.KeyCode.A) then
+        root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(5), 0)
+    end
+    if UIS:IsKeyDown(Enum.KeyCode.D) then
+        root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(-5), 0)
+    end
+    if UIS:IsKeyDown(Enum.KeyCode.Space) then
+        direction = direction + Vector3.new(0, 1, 0)
+    end
+    
+    if direction.Magnitude > 0 then
+        bodyVelocity.Velocity = direction.Unit * speed
+    else
+        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    end
+end)
+
+-- Auto-reconnect on respawn
+player.CharacterAdded:Connect(function(newChar)
+    character = newChar
+    humanoid = newChar:WaitForChild("Humanoid")
+    humanoid.PlatformStand = true
+    
+    local newRoot = newChar:WaitForChild("HumanoidRootPart")
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bodyVelocity.Parent = newRoot
+end)
+
+-- Rayfield Notification
+Rayfield:Notify({
+   Title = "Ultra-Flight Activated",
+   Content = "WASD + Space to fly | Shift for boost",
+   Duration = 3,
+   Image = 4483362458,
+})
+   end,
+})
+
+local TeleportTab = Window:CreateTab("🛥️Teleport", nil) -- Title, Image
+local Section = TeleportTab:CreateSection("Section Example")
