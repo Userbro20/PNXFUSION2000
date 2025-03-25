@@ -1,0 +1,52 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "Blox-Fruits-Hub",
+   LoadingTitle = "PNXFusion2000",
+   LoadingSubtitle = "by PhantomNovaX",
+   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+    ConfigurationSaving = {
+      Enabled = false,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "PNXFusion2000-F1"
+   },
+
+   Discord = {
+      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+
+   KeySystem = false, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Blox-Fruits-Hub-Key",
+      Subtitle = "Sub to PhantomNovaX On YT",
+      Note = "Key here: https://pastebin.com/3te7CDnJ", -- Use this to tell the user how to get a key
+      FileName = "PNXFusion2000-Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = true, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"https://pastebin.com/3te7CDnJ"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
+})
+
+local MainTab = Window:CreateTab("🏠Home", nil) -- Title, Image
+local MainSection = MainTab:CreateSection("Section Example")
+
+Rayfield:Notify({
+   Title = "PNXFusion2000 ACTIVATED!",
+   Content = "You May Now Use Blox-Fruits-Hub",
+   Duration = 5,
+   Image = 4483362458,
+})
+
+local Slider = Tab:CreateSlider({
+   Name = "Toggle Walkspeed",
+   Range = {0, 100},
+   Increment = 1,
+   Suffix = "Speed",
+   CurrentValue = 16,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = (Value)
+    end,
+})
