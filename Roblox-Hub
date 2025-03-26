@@ -30,7 +30,7 @@ local Window = Rayfield:CreateWindow({
 })
 
 local MainTab = Window:CreateTab("🏠Home", nil) -- Title, Image
-local MainSection = MainTab:CreateSection("Section Example")
+local MainSection = MainTab:CreateSection("Section Examplex")
 
 Rayfield:Notify({
    Title = "PNXFusion2000 ACTIVATED!",
@@ -39,7 +39,11 @@ Rayfield:Notify({
    Image = 4483362458,
 })
 
-local Slider = Tab:CreateSlider({
+local MainTab = Window:CreateTab("Main", nil) -- Title, Image
+local MainSection = MainTab:CreateSection("Supreme-Hacks")
+
+
+local Slider = MainTab:CreateSlider({
    Name = "Toggle Walkspeed",
    Range = {0, 100},
    Increment = 1,
@@ -49,4 +53,140 @@ local Slider = Tab:CreateSlider({
    Callback = function(Value)
         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = (Value)
     end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Flight",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+           -- Roblox Flight Script (WASD + Space Controls)
+local player = game:GetService("Players").LocalPlayer
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- Flight Settings
+local FLIGHT_SPEED = 50
+local TURN_SPEED = 2
+local isFlying = false
+local bodyVelocity
+
+-- Toggle Flight Function
+local function toggleFlight()
+    isFlying = not isFlying
+    local character = player.Character
+    if not character then return end
+    
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    
+    if not humanoid or not rootPart then return end
+    
+    if isFlying then
+        -- Enable flight
+        humanoid.PlatformStand = true
+        bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+        bodyVelocity.Parent = rootPart
+        
+        -- Notification
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Flight Enabled",
+            Text = "WASD to move | Space to ascend | Shift to descend",
+            Duration = 3
+        })
+    else
+        -- Disable flight
+        humanoid.PlatformStand = false
+        if bodyVelocity then
+            bodyVelocity:Destroy()
+        end
+        
+        -- Notification
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Flight Disabled",
+            Text = "Flying mode turned off",
+            Duration = 2
+        })
+    end
+end
+
+-- Flight Controls
+local function handleFlight()
+    if not isFlying then return end
+    
+    local character = player.Character
+    if not character then return end
+    
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return end
+    
+    local direction = Vector3.new()
+    local velocity = Vector3.new(0, 0, 0)
+    
+    -- Movement Controls
+    if UIS:IsKeyDown(Enum.KeyCode.W) then
+        direction = direction + rootPart.CFrame.LookVector
+    end
+    if UIS:IsKeyDown(Enum.KeyCode.S) then
+        direction = direction - rootPart.CFrame.LookVector
+    end
+    if UIS:IsKeyDown(Enum.KeyCode.A) then
+        direction = direction - rootPart.CFrame.RightVector
+    end
+    if UIS:IsKeyDown(Enum.KeyCode.D) then
+        direction = direction + rootPart.CFrame.RightVector
+    end
+    if UIS:IsKeyDown(Enum.KeyCode.Space) then
+        direction = direction + Vector3.new(0, 1, 0)
+    end
+    if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
+        direction = direction + Vector3.new(0, -1, 0)
+    end
+    
+    -- Apply movement
+    if direction.Magnitude > 0 then
+        velocity = direction.Unit * FLIGHT_SPEED
+    end
+    
+    -- Apply turning
+    if UIS:IsKeyDown(Enum.KeyCode.Q) then
+        rootPart.CFrame = rootPart.CFrame * CFrame.Angles(0, math.rad(TURN_SPEED), 0)
+    end
+    if UIS:IsKeyDown(Enum.KeyCode.E) then
+        rootPart.CFrame = rootPart.CFrame * CFrame.Angles(0, math.rad(-TURN_SPEED), 0)
+    end
+    
+    if bodyVelocity then
+        bodyVelocity.Velocity = velocity
+    end
+end
+
+-- Keybind (Press F to toggle flight)
+UIS.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.F then
+        toggleFlight()
+    end
+end)
+
+-- Handle flight controls every frame
+RunService.Heartbeat:Connect(handleFlight)
+
+-- Auto-reconnect on respawn
+player.CharacterAdded:Connect(function(character)
+    if isFlying then
+        toggleFlight() -- Turn off first
+        task.wait(1)  -- Small delay
+        toggleFlight() -- Turn back on
+    end
+end)
+
+-- Initial notification
+game.StarterGui:SetCore("SendNotification", {
+    Title = "Flight Script Loaded",
+    Text = "Press F to toggle flying mode",
+    Duration = 5
+})
+        end,
 })
